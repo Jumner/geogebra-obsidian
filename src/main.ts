@@ -1,4 +1,5 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Menu } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Menu, MarkdownPostProcessorContext } from 'obsidian';
+import Renderer from './renderer';
 
 // Remember to rename these classes and interfaces!
 
@@ -12,6 +13,11 @@ const DEFAULT_SETTINGS:GeogebraSettings  = {
 
 export default class GeogebraObsidian extends Plugin {
 	settings: GeogebraSettings;
+	renderer: Renderer;
+	processor = async(content: string, el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
+		let data = "hello";
+		this.renderer.render(data, el, ctx);
+	}
 
 	generateIframe() {
 		return `<iframe scrolling="no"
@@ -27,6 +33,7 @@ export default class GeogebraObsidian extends Plugin {
 		const position = editor.getCursor();
 		editor.replaceRange('\n' + this.generateIframe(), {line: position.line, ch: editor.getLine(position.line).length});
 	}
+
 
 	async onload() {
 		await this.loadSettings();
@@ -53,6 +60,8 @@ export default class GeogebraObsidian extends Plugin {
 				});
 			}
 		}));
+		// Register the code block
+		this.registerMarkdownCodeBlockProcessor('geogebra', this.processor);
 	}
 
 	onunload() {
