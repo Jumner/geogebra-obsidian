@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Menu, MarkdownPostProcessorContext } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, addIcon, PluginSettingTab, Setting, Menu, MarkdownPostProcessorContext } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -13,19 +13,14 @@ const DEFAULT_SETTINGS:GeogebraSettings  = {
 export default class GeogebraObsidian extends Plugin {
 	settings: GeogebraSettings;
 
-	generateIframe() {
-		return `<iframe scrolling="no"
-		src="https://www.geogebra.org/material/iframe/id/23587/width/1600/height/715/border/888888/rc/true/ai/true/sdz/false/smb/true/stb/true/stbh/true/ld/false/sri/false"
-		width="1600px"
-		height="715px"
-		style="border:0px;" allowfullscreen>
-		</iframe>`
+	generateText() {
+		return `\`\`\`geogebra\nhello!\n\`\`\``;
 	}
 
 	insertGeo(editor: Editor) {
 		console.log("insert geo");
 		const position = editor.getCursor();
-		editor.replaceRange('\n' + this.generateIframe(), {line: position.line, ch: editor.getLine(position.line).length});
+		editor.replaceRange('\n' + this.generateText(), {line: position.line, ch: editor.getLine(position.line).length});
 	}
 
 
@@ -47,13 +42,21 @@ export default class GeogebraObsidian extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new GeogebraSettingsTab(this.app, this));
 		
+		addIcon("geogebra", `
+<path xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#666" stroke-width="2.2" d="m15.3,4.7a11.4,9.1-26 1,0 1,0z"/> 
+<g xmlns="http://www.w3.org/2000/svg" stroke-linecap="round">
+<path stroke="#000" stroke-width="6" d="m13.2,4.9h0M3.8,11.8h0M7.2,22.9h0M20.1,21.2h0M24.4,10.1h0"/>
+<path stroke="#99F" stroke-width="4.3" d="m13.2,4.9h0M3.8,11.8h0M7.2,22.9h0M20.1,21.2h0M24.4,10.1h0"/>
+</g>`); // Add icon
+
 		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, editor: Editor, view: MarkdownView) => {
 			if(view) {
 				menu.addItem((item) => {
-					item.setTitle("Insert Geogebra").setIcon("chart").onClick((_) => {this.insertGeo(editor)});
+					item.setTitle("Insert Geogebra").setIcon("geogebra").onClick((_) => {this.insertGeo(editor)});
 				});
 			}
 		}));
+
 		// Register the code block
 		this.registerMarkdownCodeBlockProcessor("geogebra", (content, el, ctx) => {
 			const main = el.createEl('div', {cls: "ggb-element"});
