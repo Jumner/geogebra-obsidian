@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, Menu } from 'obsidian';
 
 // Remember to rename these classes and interfaces!
 
@@ -13,6 +13,21 @@ const DEFAULT_SETTINGS:GeogebraSettings  = {
 export default class GeogebraObsidian extends Plugin {
 	settings: GeogebraSettings;
 
+	generateIframe() {
+		return `<iframe scrolling="no"
+		src="https://www.geogebra.org/material/iframe/id/23587/width/1600/height/715/border/888888/rc/true/ai/true/sdz/false/smb/true/stb/true/stbh/true/ld/false/sri/false"
+		width="1600px"
+		height="715px"
+		style="border:0px;" allowfullscreen>
+		</iframe>`
+	}
+
+	insertGeo(editor: Editor) {
+		console.log("insert geo");
+		const position = editor.getCursor();
+		editor.replaceRange('\n' + this.generateIframe(), {line: position.line, ch: editor.getLine(position.line).length});
+	}
+
 	async onload() {
 		await this.loadSettings();
 
@@ -21,25 +36,23 @@ export default class GeogebraObsidian extends Plugin {
 
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
 		this.addCommand({
-			id: 'open-sample-modal-complex',
-			name: 'Open sample modal (complex)',
-			checkCallback: (checking: boolean) => {
-				// Conditions to check
-				const markdownView = this.app.workspace.getActiveViewOfType(MarkdownView);
-				if (markdownView) {
-					// If checking is true, we're simply "checking" if the command can be run.
-					// If checking is false, then we want to actually perform the operation.
-					if (!checking) {
-					}
-
-					// This command will only show up in Command Palette when the check function returns true
-					return true;
-				}
+			id: 'insert-geogebra',
+			name: 'Insert Geogebra',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				this.insertGeo(editor);
 			}
 		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new GeogebraSettingsTab(this.app, this));
+		
+		this.registerEvent(this.app.workspace.on('editor-menu', (menu: Menu, editor: Editor, view: MarkdownView) => {
+			if(view) {
+				menu.addItem((item) => {
+					item.setTitle("Insert Geogebra").setIcon("chart").onClick((_) => {this.insertGeo(editor)});
+				});
+			}
+		}));
 	}
 
 	onunload() {
