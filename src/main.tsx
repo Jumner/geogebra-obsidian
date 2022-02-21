@@ -60,13 +60,25 @@ export default class GeogebraObsidian extends Plugin {
 			}
 		}));
 
+		Geogebra.defaultProps = {
+			appName: "classic",
+			width: 800,
+			height: 600,
+			showToolBar: false,
+			showAlgebraInput: true,
+			showMenuBar: false,
+			reloadOnPropChange: false,
+		};
 		// Register the code block
 		this.registerMarkdownCodeBlockProcessor("geogebra", (content, el, ctx) => {
 			const main = el.createEl('div', {cls: "ggb-element"});
 			ReactDOM.render(
 				<Geogebra 
-					debug
 					appName="3d"
+					width={800}
+					height={600}
+					showToolBar={false}
+					showMenuBar={false}
 					appletOnLoad={() => {console.log("geo loaded")}}
 					id="app1"
 				/>,
