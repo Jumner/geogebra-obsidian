@@ -1,4 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, addIcon, PluginSettingTab, Setting, Menu, MarkdownPostProcessorContext } from 'obsidian';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import Geogebra from "react-geogebra";
 
 // Remember to rename these classes and interfaces!
 
@@ -60,8 +63,17 @@ export default class GeogebraObsidian extends Plugin {
 		// Register the code block
 		this.registerMarkdownCodeBlockProcessor("geogebra", (content, el, ctx) => {
 			const main = el.createEl('div', {cls: "ggb-element"});
-			const header = main.createEl('h1', {text: 'Geogebra moment\n'});
-			const text = main.createEl('p', {text: content});
+			ReactDOM.render(
+				<Geogebra 
+					debug
+					appName="3d"
+					appletOnLoad={() => {console.log("geo loaded")}}
+					id="app1"
+				/>,
+				main
+			);
+			// const header = main.createEl('h1', {text: 'Geogebra moment\n'});
+			// const text = main.createEl('p', {text: content});
 		});
 	}
 
