@@ -3,6 +3,12 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import Geogebra from "react-geogebra";
 
+declare global {
+  interface Window {
+    app1: any; // Declare apps
+  }
+}
+
 // Remember to rename these classes and interfaces!
 
 interface GeogebraSettings {
@@ -72,6 +78,9 @@ export default class GeogebraObsidian extends Plugin {
 		// Register the code block
 		this.registerMarkdownCodeBlockProcessor("geogebra", (content, el, ctx) => {
 			const main = el.createEl('div', {cls: "ggb-element"});
+			function onUpdate(s:String) {
+				console.log("save");
+			}
 			ReactDOM.render(
 				<Geogebra 
 					appName="3d"
@@ -79,7 +88,10 @@ export default class GeogebraObsidian extends Plugin {
 					height={600}
 					showToolBar={false}
 					showMenuBar={false}
-					appletOnLoad={() => {console.log("geo loaded")}}
+					appletOnLoad={() => {
+						//console.log(window.app1.getBase64())
+						window.app1.registerUpdateListener("onUpdate");
+					}}
 					id="app1"
 				/>,
 				main
